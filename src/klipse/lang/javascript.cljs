@@ -42,16 +42,17 @@
       asyncRun)))
 
 ;; Stopify runtime captures exceptions. The callback handles them correctly.
-(defn stopify-cb [result]
+(defn stopify-cb [c result]
+  (js/console.info result)
+  (js/console.info c)
+  
   (if (= (aget result "type") "exception")
-    (js/console.log "Exception: " (aget result "value"))
-    js/undefined))
+    (put! c (str "Exception: " (aget result "value")))
+    (put! c (str result))))
 
-(defn stopify-run [asyncRun]
-  (do
-    #_(!> js/console.info asyncRun.code)
-    (!> asyncRun.run stopify-cb)
-    ""))
+(defn stopify-run [c asyncRun]
+  (!> asyncRun.run (partial stopify-cb c))
+  "")
 
 (defn eval-with-logger!
   "Evals an expression where the window.console object is lexically bound to an object that puts the console output on a channel.
@@ -81,9 +82,9 @@
                             (if async-code?
                               (eval-with-logger! c exp)
                               (my-with-redefs [js/console.log (append-to-chan c)]
-                                              (-> exp
+                                              (->> exp
                                                   stopify-compile
-                                                  stopify-run)))
+                                                  (stopify-run c))))
                             (catch :default o
                               (str o)))
                           (str "//Cannot load script: " script "\n"
