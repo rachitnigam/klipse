@@ -8,7 +8,7 @@
    [cljs-http.client :as http]
    [clojure.string :as string]
    [cljs.core.async :refer [<! chan put!]]
-   [klipse.common.stopify :refer [stopify-compile stopify-cb stopify-run]]
+   [klipse.common.stopify :as stopify]
    [klipse.common.registry :refer [codemirror-mode-src scripts-src register-mode]]))
 
 ;(set! *warn-on-infer* true)
@@ -63,9 +63,7 @@
                             (if async-code?
                               (eval-with-logger! c exp)
                               (my-with-redefs [js/console.log (append-to-chan c)]
-                                              (->> exp
-                                                   (stopify-compile (append-to-chan c))
-                                                   (stopify-run (append-to-chan c)))))
+                                              (stopify/eval exp (append-to-chan c))))
                             (catch :default o
                               (str o)))
                           (str "//Cannot load script: " script "\n"
