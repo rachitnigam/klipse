@@ -8,6 +8,7 @@
    [cljs-http.client :as http]
    [clojure.string :as string]
    [cljs.core.async :refer [<! chan put!]]
+   [klipse.common.stopify :refer [stopify-compile stopify-cb stopify-run]]
    [klipse.common.registry :refer [codemirror-mode-src scripts-src register-mode]]))
 
 ;(set! *warn-on-infer* true)
@@ -33,26 +34,6 @@
     (put! c (string/join " "  (map beautify args)))
     (put! c "\n")
     js/undefined))
-
-(defn stopify-compile [source]
-  (let [asyncRun (!> js/stopify.stopifyLocally source)]
-    (do
-      ;; Set the function called on the last expression
-      (aset asyncRun.g "callbackLast" js/console.log)
-      asyncRun)))
-
-;; Stopify runtime captures exceptions. The callback handles them correctly.
-(defn stopify-cb [c result]
-  (js/console.info result)
-  (js/console.info c)
-  
-  (if (= (aget result "type") "exception")
-    (put! c (str "Exception: " (aget result "value")))
-    (put! c (str result))))
-
-(defn stopify-run [c asyncRun]
-  (!> asyncRun.run (partial stopify-cb c))
-  "")
 
 (defn eval-with-logger!
   "Evals an expression where the window.console object is lexically bound to an object that puts the console output on a channel.
