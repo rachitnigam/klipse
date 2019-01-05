@@ -64,8 +64,8 @@
                               (eval-with-logger! c exp)
                               (my-with-redefs [js/console.log (append-to-chan c)]
                                               (->> exp
-                                                  stopify-compile
-                                                  (stopify-run c))))
+                                                   (stopify-compile (append-to-chan c))
+                                                   (stopify-run (append-to-chan c)))))
                             (catch :default o
                               (str o)))
                           (str "//Cannot load script: " script "\n"
