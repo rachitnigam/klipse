@@ -8,10 +8,8 @@
 
 (defn compile [cb source]
   (let [asyncRun (!> js/stopify.stopifyLocally source)]
-    (do
-      ;; Set the function called on the last expression
-      (! asyncRun.g.callbackLast cb)
-      asyncRun)))
+    (! asyncRun.g.callbackLast cb)
+    asyncRun))
 
 ;; Stopify runtime captures exceptions. The callback handles them correctly.
 (defn- stopify-cb [cb result]
@@ -26,4 +24,9 @@
   (->> source
        (compile cb)
        (run cb)))
+
+(defn eval-async [source]
+  (let [c (chan)]
+    (eval source #(put! c %))
+    c))
 

@@ -7,7 +7,7 @@
    [klipse.utils :refer [load-scripts verbose? eval-in-global-scope setup-container!]]
    [cljs-http.client :as http]
    [clojure.string :as string]
-   [cljs.core.async :refer [<! chan put!]]
+   [cljs.core.async :refer [<! chan put! timeout]]
    [klipse.common.stopify :as stopify]
    [klipse.common.registry :refer [codemirror-mode-src scripts-src register-mode]]))
 
@@ -30,10 +30,12 @@
       (str js-exp))))
 
 (defn append-to-chan [c]
-  (fn [& args]
-    (put! c (string/join " "  (map beautify args)))
-    (put! c "\n")
-    js/undefined))
+   (fn [& args]
+     (go
+       (<! (timeout 10))
+       (put! c (string/join " "  (map beautify args)))
+       (put! c "\n"))
+     js/undefined))
 
 (defn eval-with-logger!
   "Evals an expression where the window.console object is lexically bound to an object that puts the console output on a channel.
@@ -74,7 +76,7 @@
 (def opts {:editor-in-mode "javascript"
            :editor-out-mode "javascript"
            :beautify-output? false
-           :eval-fn str-eval-js-async
+           :eval-fn (fn [& args] (apply str-eval-js-async args))
            :external-scripts [(codemirror-mode-src "javascript")
                               "https://viebel.github.io/klipse/repo/js/stopify-full.bundle.js"
                               (scripts-src "pretty_format.js")]
