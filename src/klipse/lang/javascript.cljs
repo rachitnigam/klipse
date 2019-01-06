@@ -32,9 +32,9 @@
 (defn append-to-chan [c]
    (fn [& args]
      (go
-       (<! (timeout 10))
-       (put! c (string/join " "  (map beautify args)))
-       (put! c "\n"))
+       #_(<! (timeout 1))
+       #_(put! c (string/join " "  (map beautify args)))
+       (put! c (str args "\n")))
      js/undefined))
 
 (defn eval-with-logger!

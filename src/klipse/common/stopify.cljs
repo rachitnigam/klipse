@@ -8,6 +8,7 @@
 
 (defn compile [cb source]
   (let [asyncRun (!> js/stopify.stopifyLocally source)]
+    (!> js/console.info asyncRun.code)
     (! asyncRun.g.callbackLast cb)
     asyncRun))
 
