@@ -32,8 +32,8 @@
 (defn append-to-chan [c]
    (fn [& args]
      (go
-       #_(<! (timeout 1))
-       #_(put! c (string/join " "  (map beautify args)))
+       (<! (timeout 0))
+       (put! c (string/join " "  (map beautify args)))
        (put! c (str args "\n")))
      js/undefined))
 
@@ -65,7 +65,7 @@
                             (if async-code?
                               (eval-with-logger! c exp)
                               (my-with-redefs [js/console.log (append-to-chan c)]
-                                              (stopify/eval exp (append-to-chan c))))
+                                              (stopify/eval exp js/console.log)))
                             (catch :default o
                               (str o)))
                           (str "//Cannot load script: " script "\n"
