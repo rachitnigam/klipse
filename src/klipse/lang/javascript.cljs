@@ -30,12 +30,8 @@
       (str js-exp))))
 
 (defn append-to-chan [c]
-   (fn [& args]
-     (go
-       (<! (timeout 0))
-       (put! c (string/join " "  (map beautify args)))
-       (put! c (str args "\n")))
-     js/undefined))
+  (fn [& args]
+    (put! c (str (string/join " "  (map beautify args)) "\n"))))
 
 (defn eval-with-logger!
   "Evals an expression where the window.console object is lexically bound to an object that puts the console output on a channel.
@@ -48,9 +44,12 @@
     (eval-in-global-scope wrapped-exp)
     ""))
 
+(def async-run nil)
 (defn str-eval-js-async [exp {:keys [async-code? external-libs container-id] :or {async-code? false external-libs nil}}]
   (let [c (chan)]
     (when (verbose?) (js/console.info "[javascript] evaluating" exp))
+    #_(when async-run
+      (stopify/stop async-run))
     (go
       (if (string/blank? exp)
         (put! c "")
@@ -60,15 +59,15 @@
                         (map external-lib-path external-libs)
                         :secured-eval? false))]
               (try
-                (put! c (if (= :ok status)
-                          (try
-                            (if async-code?
-                              (eval-with-logger! c exp)
-                              (my-with-redefs [js/console.log (append-to-chan c)]
-                                              (stopify/eval exp identity #_js/console.log)))
-                            (catch :default o
-                              (str o)))
-                          (str "//Cannot load script: " script "\n"
+                (if (= :ok status)
+                  (try
+                    (if async-code?
+                      (eval-with-logger! c exp)
+                      (my-with-redefs [js/console.log (append-to-chan c)]
+                                      (set! async-run (stopify/eval exp (append-to-chan c) #_js/console.log))))
+                    (catch :default o
+                      (put! c (str o))))
+                  (put! c (str "//Cannot load script: " script "\n"
                                "//Error: " http-status))))))))
     c))
 

@@ -53,6 +53,7 @@
           (let [evaluation-chan (eval-fn (str preamble src-code) @state)
                 result (<! evaluation-chan)
                 first-result (if (string? result) result (:data result))]
+            (js/console.info "changed")
             (setter first-result)
             (when loop-msec
               (go-loop []

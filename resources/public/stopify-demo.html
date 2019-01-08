@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+  <p>This page runs Stopify in the browser.</p>
+  <textarea id="data">Output starts here...</textarea>
+<script src="https://viebel.github.io/klipse/repo/js/stopify-full.bundle.js"></script>
+<script>
+var program = `
+  onInterval(function() {
+    while (false) {}
+    if (paused) {
+      throw 'should have been paused';
+    }
+    console.log(i++);
+  }, 1000)
+`;
+
+j = 0
+
+function onInterval(cb, time) {
+  console.info(`onInterval called ${++j} times`)
+  function handler() {
+    runner.processEvent(cb,
+      (result) => {
+        if (result.type === 'exception') {
+          window.clearInterval(intervalID)
+          throw result.value
+        }
+      }, console.info);
+  }
+  var intervalID = window.setInterval(handler, time)
+}
+
+
+var runner = stopify.stopifyLocally(program, { }, {
+  estimator: 'countdown',
+  yieldInterval: 1
+});
+
+runner.g.i = 0;
+runner.g.onInterval = onInterval;
+runner.g.window = window;
+runner.g.paused = true;
+
+const data = document.getElementById('data');
+runner.g.console = {
+  log(str) {
+    data.value = (data.value + str + "\n")
+    const evt = new Event('change');
+    data.dispatchEvent(evt)
+  },
+  info(str) {
+    return console.info(str)
+  }
+}
+
+function start() {
+  runner.g.paused = false;
+  return runner.run((result) => {
+    if (result.type !== 'normal') {
+      window.document.title = 'error';
+    }
+  });
+}
+
+function shouldResume () {
+  if (!runner.g.paused) {
+    return runner.resume();
+  }
+  else {
+    return setTimeout(shouldResume, 100);
+  }
+}
+
+function pause() {
+  runner.g.paused = true;
+  return runner.pause(shouldResume);
+}
+
+function resume() {
+  runner.g.paused = false;
+}
+
+window.onerror = function() {
+  window.document.title = "error";
+}
+</script>
+  <button onclick="start()">Start</button>
+  <button onclick="pause()">Pause</button>
+  <button onclick="resume()">Resume</button>
+
+</body>
+</html>
