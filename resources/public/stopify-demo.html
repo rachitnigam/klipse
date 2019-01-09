@@ -3,11 +3,11 @@
 
 <body>
   <p>This page runs Stopify in the browser.</p>
-  <textarea id="data">Output starts here...</textarea>
-<script src="https://viebel.github.io/klipse/repo/js/stopify-full.bundle.js"></script>
+  <textarea style="height:100px;" id="data">Output starts here...</textarea>
+<script src="./stopify-full.bundle.js"></script>
 <script>
 var program = `
-  onInterval(function() {
+  setInterval(function() {
     while (false) {}
     if (paused) {
       throw 'should have been paused';
@@ -19,14 +19,15 @@ var program = `
 j = 0
 
 function onInterval(cb, time) {
-  console.info(`onInterval called ${++j} times`)
   function handler() {
     runner.processEvent(cb,
       (result) => {
         if (result.type === 'exception') {
           window.clearInterval(intervalID)
           throw result.value
-        }
+}
+  console.info(`onInterval called ${++j} times`)
+
       }, console.info);
   }
   var intervalID = window.setInterval(handler, time)
@@ -39,14 +40,14 @@ var runner = stopify.stopifyLocally(program, { }, {
 });
 
 runner.g.i = 0;
-runner.g.onInterval = onInterval;
+runner.g.setInterval = onInterval;
 runner.g.window = window;
 runner.g.paused = true;
 
 const data = document.getElementById('data');
 runner.g.console = {
   log(str) {
-    data.value = (data.value + str + "\n")
+    data.value = (data.value + str + ", ")
     const evt = new Event('change');
     data.dispatchEvent(evt)
   },
