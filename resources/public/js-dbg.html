@@ -49,11 +49,19 @@
 </code></pre>
 <h2> Infinite loops</h2>
 <pre><code class="js">
-    x = 0;
-    while(x < 100) {
-    x = x + 1;
-    console.log(x);
-    }
+function log(str) {
+  evt = new Event('change');
+  klipse_container.innerHTML = str;
+  klipse_container.dispatchEvent(evt);
+}
+var sum = 0, j = 0;
+while(true) {
+  sum ++;
+  if (sum === 1e5) {
+    log(j++);
+    sum = 0;
+  }
+}
 </code></pre>
 
 <h2> jQuery</h2>
@@ -101,6 +109,7 @@ x
       2 + 3
     </div>
     <br/>
+
 
     <div class="eval-js">
       klipse_container.innerHTML="hello";
