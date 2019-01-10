@@ -49,6 +49,7 @@
 </code></pre>
 <h2> Infinite loops</h2>
 <pre><code class="js">
+klipse_container.style="width:500px; white-space: pre-wrap; background-color: yellow;"
 function log(str) {
   evt = new Event('change');
   klipse_container.innerHTML = str;
@@ -57,7 +58,7 @@ function log(str) {
 var sum = 0, j = 0;
 while(true) {
   sum ++;
-  if (sum === 1e5) {
+  if (sum === 1e6) {
     log(j++);
     sum = 0;
   }
