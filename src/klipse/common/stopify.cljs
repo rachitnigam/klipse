@@ -8,10 +8,8 @@
 
 (defn compile [cb source]
   (let [asyncRun (!> js/stopify.stopifyLocally source)]
-    #_(!> js/console.info asyncRun.code)
+    (!> js/console.info asyncRun.code)
     (! asyncRun.g.callbackLast cb)
-    (! asyncRun.g.setTimeout   (fn [cb timeout]
-                                 (js/console.info "aaaa setTimeout")))
     asyncRun))
 
 ;; Stopify runtime captures exceptions. The callback handles them correctly.

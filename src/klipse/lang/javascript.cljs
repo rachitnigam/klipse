@@ -27,6 +27,7 @@
         js/prettyFormat
         str)
     (catch js/Object o
+      (js/console.error (str o))
       (str js-exp))))
 
 (defn append-to-chan [c]

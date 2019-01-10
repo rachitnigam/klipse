@@ -7,28 +7,33 @@
         <link rel="stylesheet" type="text/css" href="css/codemirror.css">
     </head>
     <body>
-      <style>
-	.klipse-snippet {
-	width: 50%;
-	float: left;
-	}
-	.klipse-result {
-	width: 50%;
-	float:left;
-	}
-	.klipse-separator {
-	clear: both;
-	}
-      </style>
       <pre><code class="jsone">
-	  setTimeout(() => console.log(3)    ,1000)
-/*	  sum = 0
-while(true) {
+	  1 + 2
+      </code></pre>
+
+      <pre><code class="jsone">
+	  klipse_container.innerHTML = 39
+      </code></pre>
+      <pre><code class="jsone">
+var x = 0;
+klipse_container.style="width:2000px;    white-space: pre-wrap; background-color: yellow;"
+klipse_container.innerHTML = "";
+while(x< 10000) {
+  x = x + 1;
+  klipse_container.innerHTML += x +", ";
+}  
+a = 1;		  
+      </code></pre>
+      <pre><code class="jsone">
+	  (() => {
+	    var sum = 0
+while(sum < 1e6) {
   sum++;
-  if(sum % 10000 === 0) {
+  if(sum % 10 === 0) {
     console.info(sum);
   }
-} */ 
+	    }
+	    })()
 	  </code></pre>
       <pre><code class="js">
 	  sum = 0
