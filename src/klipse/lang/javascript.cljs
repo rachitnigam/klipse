@@ -78,7 +78,7 @@
            :beautify-output? false
            :eval-fn (fn [& args] (apply str-eval-js-async args))
            :external-scripts [(codemirror-mode-src "javascript")
-                              "https://viebel.github.io/klipse/repo/js/stopify-full.bundle.1.js"
+                              "stopify-full.bundle.js"
                               (scripts-src "pretty_format.js")]
            :comment-str "//"})
 
