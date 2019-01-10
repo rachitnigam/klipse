@@ -8,7 +8,7 @@
   </head>
   <body>
     <div class="clojure">
-    (require 'clojure.core.specs.alpha)
+      (+ 1 2)
     </div>
     <div class="clojure">
       (let [a])
@@ -21,6 +21,9 @@
     </div>
     <div class="clojure">
     (mapv 1 [1 2 3])
+    </div>
+    <div class="clojure">
+    (require 'clojure.core.specs.alpha)
     </div>
     <div class="clojure">
     (require 'clojure.core.specs.alpha)
@@ -96,7 +99,7 @@
 //      clojure_bundled_ns_ignore: /gadjett\..*/
       };
       if(window.location.search.match(/transpile=1/)) {
-      window.klipse_settings.selector_js = '.clojure';
+      window.klipse_settings.selector_js = '.klojure';
       } else {
       window.klipse_settings.selector = '.clojure';
       }

@@ -7,26 +7,46 @@
         <link rel="stylesheet" type="text/css" href="css/codemirror.css">
     </head>
     <body>
-      <style>
-	.klipse-snippet {
-	width: 50%;
-	float: left;
-	}
-	.klipse-result {
-	width: 50%;
-	float:left;
-	}
-	.klipse-separator {
-	clear: both;
-	}
-      </style>
-
-      <pre><code class="js">
-	  b = 1
+      <pre><code class="jsone">
+	  1 + 2
       </code></pre>
 
+      <pre><code class="jsone">
+	  klipse_container.innerHTML = 39
+      </code></pre>
+      <pre><code class="jsone">
+var x = 0;
+klipse_container.style="width:2000px;    white-space: pre-wrap; background-color: yellow;"
+klipse_container.innerHTML = "";
+while(x< 10000) {
+  x = x + 1;
+  klipse_container.innerHTML += x +", ";
+}  
+a = 1;		  
+      </code></pre>
+      <pre><code class="jsone">
+	  (() => {
+	    var sum = 0
+while(sum < 1e6) {
+  sum++;
+  if(sum % 10 === 0) {
+    console.info(sum);
+  }
+	    }
+	    })()
+	  </code></pre>
       <pre><code class="js">
-	  c = [1, 2, 3]
+	  sum = 0
+	  while(true) { sum++; }
+      </code></pre>
+      <pre><code class="js">
+	  sum = 0
+	  while(true) {
+	  sum++;
+	  if(sum % 1e6 === 0) {
+	  console.log(sum);
+	  }
+	  }
       </code></pre>
 <pre><code class="js" data-async-code="true">
     function a () { return "a";}
@@ -47,33 +67,19 @@
     console.log("2nd snippet - bb");
     }, 500);
 </code></pre>
-<h2> Infinite loops</h2>
-<pre><code class="js">
-klipse_container.style="width:500px; white-space: pre-wrap; background-color: yellow;"
-function log(str) {
-  evt = new Event('change');
-  klipse_container.innerHTML = str;
-  klipse_container.dispatchEvent(evt);
-}
-var sum = 0, j = 0;
-while(true) {
-  sum ++;
-  if (sum === 1e6) {
-    log(j++);
-    sum = 0;
-  }
-}
-</code></pre>
 
 <h2> jQuery</h2>
 <pre><code class="js" data-external-libs="jQuery">
 $
 </code></pre>
-<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js"></script>
-<h2> lodash </h2>
+
+<h2>infinite loops </h2>
+<p> Infinite loops don't cause the browser to freeze. Yeah! </p>
 <pre><code class="js">
-_.map([1,2,3], x => x + 1)
+window.cnt=0;
+//while(true) { window.cnt = window.cnt + 1} 
 </code></pre>
+
 
 <h2>alert </h2>
 <pre><code class="js">
@@ -104,13 +110,11 @@ x
 <pre><code class="js">
     permutations([1, 2, 3])
 </code></pre>
-
     <div class="eval-js">
       console.log("CCC")
       2 + 3
     </div>
     <br/>
-
 
     <div class="eval-js">
       klipse_container.innerHTML="hello";
@@ -123,10 +127,6 @@ x
       [1,2,3]
     </div>
     <br/>
-
-    <div class="eval-js">
-      throw 'This is an exception.'
-    </div>
 
     <h2> Function defs should be shared between snippets </h2>
     <pre><code class="eval-js">
@@ -151,7 +151,7 @@ x
 
       <script>
         window.klipse_settings = {
-        selector_eval_js: '.js,.eval-js',
+        selector_eval_js: '.jsone,.eval-jsone',
         };
         </script>
       <script src="/cljs-out/dev-main.js"></script>

@@ -7,8 +7,9 @@
    [klipse.utils :refer [load-scripts verbose? eval-in-global-scope setup-container!]]
    [cljs-http.client :as http]
    [clojure.string :as string]
-   [cljs.core.async :refer [<! chan put!]]
-   [klipse.common.registry :refer [stopify-src codemirror-mode-src scripts-src register-mode]]))
+   [cljs.core.async :refer [<! chan put! timeout]]
+   [klipse.common.stopify :as stopify]
+   [klipse.common.registry :refer [codemirror-mode-src scripts-src register-mode]]))
 
 ;(set! *warn-on-infer* true)
 (def known-external-libs
@@ -26,32 +27,12 @@
         js/prettyFormat
         str)
     (catch js/Object o
+      (js/console.error (str o))
       (str js-exp))))
 
 (defn append-to-chan [c]
   (fn [& args]
-    (put! c (string/join " "  (map beautify args)))
-    (put! c "\n")
-    js/undefined))
-
-(defn stopify-compile [source]
-  (let [asyncRun (!> js/stopify.stopifyLocally source)]
-    (do
-      ;; Set the function called on the last expression
-      (aset asyncRun.g "callbackLast" js/console.log)
-      asyncRun)))
-
-;; Stopify runtime captures exceptions. The callback handles them correctly.
-(defn stopify-cb [result]
-  (if (= (aget result "type") "exception")
-    (js/console.log "Exception: " (aget result "value"))
-    js/undefined))
-
-(defn stopify-run [asyncRun]
-  (do
-    (!> js/console.info asyncRun.code)
-    (!> asyncRun.run stopify-cb)
-    ""))
+    (put! c (str (string/join " "  (map beautify args)) "\n"))))
 
 (defn eval-with-logger!
   "Evals an expression where the window.console object is lexically bound to an object that puts the console output on a channel.
@@ -64,9 +45,12 @@
     (eval-in-global-scope wrapped-exp)
     ""))
 
+(def async-run nil)
 (defn str-eval-js-async [exp {:keys [async-code? external-libs container-id] :or {async-code? false external-libs nil}}]
   (let [c (chan)]
     (when (verbose?) (js/console.info "[javascript] evaluating" exp))
+    #_(when async-run
+      (stopify/stop async-run))
     (go
       (if (string/blank? exp)
         (put! c "")
@@ -76,17 +60,15 @@
                         (map external-lib-path external-libs)
                         :secured-eval? false))]
               (try
-                (put! c (if (= :ok status)
-                          (try
-                            (if async-code?
-                              (eval-with-logger! c exp)
-                              (my-with-redefs [js/console.log (append-to-chan c)]
-                                              (-> exp
-                                                  stopify-compile
-                                                  stopify-run)))
-                            (catch :default o
-                              (str o)))
-                          (str "//Cannot load script: " script "\n"
+                (if (= :ok status)
+                  (try
+                    (if async-code?
+                      (eval-with-logger! c exp)
+                      (my-with-redefs [js/console.log (append-to-chan c)]
+                                      (stopify/eval exp (append-to-chan c) #_js/console.log)))
+                    (catch :default o
+                      (put! c (str o))))
+                  (put! c (str "//Cannot load script: " script "\n"
                                "//Error: " http-status))))))))
     c))
 
@@ -94,9 +76,9 @@
 (def opts {:editor-in-mode "javascript"
            :editor-out-mode "javascript"
            :beautify-output? false
-           :eval-fn str-eval-js-async
+           :eval-fn (fn [& args] (apply str-eval-js-async args))
            :external-scripts [(codemirror-mode-src "javascript")
-                              stopify-src
+                              "stopify-full.bundle.js"
                               (scripts-src "pretty_format.js")]
            :comment-str "//"})
 
@@ -119,8 +101,7 @@
                       (eval-with-logger! c transpiled-exp)
                       (my-with-redefs [js/console.log (append-to-chan c)]
                                       (-> transpiled-exp
-                                          stopify-compile
-                                          stopify-run
+                                          eval-in-global-scope
                                           beautify)))))))
       (catch :default o
         (put! c (str o))))
@@ -133,7 +114,6 @@
                   :external-scripts [(codemirror-mode-src "javascript")
                                      (scripts-src "pretty_format.js")
                                      (scripts-src "babel.min.js")
-                                     stopify-src
                                      (scripts-src "babel_polyfill.min.js")]
                   :comment-str "//"})
 
