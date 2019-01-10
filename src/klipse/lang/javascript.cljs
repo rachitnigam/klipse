@@ -65,7 +65,7 @@
                     (if async-code?
                       (eval-with-logger! c exp)
                       (my-with-redefs [js/console.log (append-to-chan c)]
-                                      (set! async-run (stopify/eval exp (append-to-chan c) #_js/console.log))))
+                                      (stopify/eval exp (append-to-chan c) #_js/console.log)))
                     (catch :default o
                       (put! c (str o))))
                   (put! c (str "//Cannot load script: " script "\n"
